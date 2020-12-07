@@ -9,15 +9,13 @@ local api = vim.api
 -- a directory and then open a js file. Boom!
 -- vim.o.hidden = true
 vim.cmd [[set hidden]]
--- vim.cmd [[let mapleader=" "]]
 -- -- create a vertical split below the current pane
 vim.o.splitbelow = true
 -- -- create a horizontal split to the right of the current pane
 vim.o.splitright = true
 
--- TODO: Not able to change leader key to space. If i change mapleader variable,
--- the default leader (\) also doesn't work
--- api.nvim_set_var('mapleader', '<Space>')
+-- took me a long time to figure out how to change the leader key in lua
+vim.g.mapleader = " "
 
 -- this initializes jhe packer plugin manager
 api.nvim_command [[packadd packer.nvim]]
@@ -149,7 +147,6 @@ api.nvim_set_keymap('n', '<leader>sv', ':source $MYVIMRC<CR>', { noremap = true 
 ------ NerdTree configuration ------
 
 -- toggle NERDTree show/hide using <C-n> and <leader>n
--- TODO: Anything with <leader> is not working. mapleader is not working.
 api.nvim_set_keymap('n', '<leader>n', ':NERDTreeToggle<CR>', { noremap = true })
 -- reveal open buffer in NERDTree
 api.nvim_set_keymap('n', '<leader>r', ':NERDTreeFind<CR>', { noremap = true })
