@@ -92,11 +92,10 @@ vim.o.expandtab = true
 -- TODO: I think when we do `set clipboard+=unnamedplus`, it's not concatenating
 -- the string 'unnamedplus' to the option clipboard. It's add another value to
 -- some object probably
-vim.o.clipboard = vim.o.clipboard .. 'unnamedplus'
+-- vim.o.clipboard = vim.o.clipboard .. 'unnamedplus'
 
 
 -- Key mappings
-api.nvim_set_keymap('n', '<leader>h', ':echo "hello"<cr>', { noremap = true })
 api.nvim_set_keymap('i', 'jk', '<esc>', { noremap = true })
 -- remap j and k to move across display lines and not real lines
 api.nvim_set_keymap('n', 'k', 'gk', { noremap = true })
@@ -195,11 +194,11 @@ api.nvim_set_keymap('n', '[g', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', { 
 
 -- setup lsp client
 
-api.nvim_exec(
+api.nvim_command(
 [[
 let g:completion_enable_auto_popup = 0
-]], false
-)
+]])
+
 require'lspconfig'.flow.setup{
         -- because we want to run the locally installed flow binary version
         -- cmd = { "yarn", "flow", "lsp" },
@@ -223,21 +222,51 @@ api.nvim_set_var('NERDSpaceDelims', 1)
 -- If we toggle the nerdtree buffer, and it's the only buffer open, it shouldn't
 -- close vim itself. It should just replace the current buffer with last open
 -- buffer
--- api.nvim_exec (
--- [[
-	-- autocmd FileType nerdtree let t:nerdtree_winnr = bufwinnr('%')
-	-- autocmd BufWinEnter * call PreventBuffersInNERDTree()
+-- I just couldn't get nvim_exec to run the below code
+-- And my guess is that nvim_command or vim.cmd only runs the first line
+-- And just ignores the rest
+-- Can test by putting echo as the second line
+-- Yup, when i put echo in the second line, nothing echoes
+-- But when it's in the first line, all is good
+-- One way to define a vimscript function can be to create a multiline string
+-- and then split it by newline and execute each line using vim.cmd
+-- local nerdtree_safe = [[
+-- autocmd FileType nerdtree let t:nerdtree_winnr = bufwinnr('%')
+-- autocmd BufWinEnter * call PreventBuffersInNERDTree()
 
-	-- function! PreventBuffersInNERDTree()
-		-- if bufname('#') =~ 'NERD_tree' && bufname('%') !~ 'NERD_tree' && exists('t:nerdtree_winnr') && bufwinnr('%') == t:nerdtree_winnr && &buftype == '' && !exists('g:launching_fzf')
-			-- let bufnum = bufnr('%')
-			-- close
-			-- exe 'b ' . bufnum
-		-- endif
-		-- if exists('g:launching_fzf') | unlet g:launching_fzf | endif
-	-- endfunction
+-- function! PreventBuffersInNERDTree()
+  -- if bufname('#') =~ 'NERD_tree' && bufname('%') !~ 'NERD_tree' && exists('t:nerdtree_winnr') && bufwinnr('%') == t:nerdtree_winnr && &buftype == '' && !exists('g:launching_fzf')
+          -- let bufnum = bufnr('%')
+          -- close
+          -- exe 'b ' . bufnum
+  -- endif
+  -- if exists('g:launching_fzf') | unlet g:launching_fzf | endif
+-- endfunction
 -- ]]
--- , false)
+-- 
+-- for cmd in nerdtree_safe:gmatch("[^\r\n]+") do
+  -- -- print(cmd)
+  -- vim.cmd(cmd)
+-- end
+-- The above didn't work. It waits for input after the first line of function
+-- declaration
+-- Solution 2: Define the function in lua and then call `lua LuaFn` for the 
+-- autocmd
+-- local nerdtree_safe = [[
+-- autocmd FileType nerdtree let t:nerdtree_winnr = bufwinnr('%')
+-- autocmd BufWinEnter * call PreventBuffersInNERDTree()
+
+-- function! PreventBuffersInNERDTree()
+  -- if bufname('#') =~ 'NERD_tree' && bufname('%') !~ 'NERD_tree' && exists('t:nerdtree_winnr') && bufwinnr('%') == t:nerdtree_winnr && &buftype == '' && !exists('g:launching_fzf')
+          -- let bufnum = bufnr('%')
+          -- close
+          -- exe 'b ' . bufnum
+  -- endif
+  -- if exists('g:launching_fzf') | unlet g:launching_fzf | endif
+-- endfunction
+-- ]]
+
+-- api.nvim_command(nerdtree_safe)
 
 -- highlight yanked stuff. Done with native neovim api. No plugin.
 -- augroup command didn't work with vim.cmd. 
