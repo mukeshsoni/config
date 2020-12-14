@@ -29,3 +29,5 @@ zstyle ':vcs_info:*' enable git
 TERM=xterm-256color
 export BAT_THEME="Dracula"
 alias config='/usr/bin/git --git-dir=/Users/msoni/.myconfig/ --work-tree=/Users/msoni'
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
