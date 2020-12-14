@@ -1,21 +1,6 @@
 local vim = vim
 local api = vim.api
 
--- otherwise vim replaces the content of current buffer with the new file you
--- open. Or maybe deletes the current buffer and creates a new one. Either way,
--- it makes swithcing between open files quickly a pain in the ass.
--- If i set the hidden option, i lose the line numbers for some reason. Not 
--- for every file though. If i open this file, everything's fine. If i open
--- a directory and then open a js file. Boom!
--- vim.o.hidden = true
-vim.cmd [[set hidden]]
--- -- create a vertical split below the current pane
-vim.o.splitbelow = true
--- -- create a horizontal split to the right of the current pane
-vim.o.splitright = true
-
--- took me a long time to figure out how to change the leader key in lua
-vim.g.mapleader = " "
 
 -- this initializes jhe packer plugin manager
 api.nvim_command [[packadd packer.nvim]]
@@ -28,20 +13,37 @@ require('packer').startup(function()
 	-- for easily changing a line to comment
 	use 'preservim/nerdcommenter'
 	-- Colorscheme
-        use 'joshdick/onedark.vim'
-        use 'itchyny/lightline.vim'
-	-- need popup, plenary and telescope plugins for telescope to work
-	use 'nvim-lua/popup.nvim'
-	-- need popup, plenary and telescope plugins for telescope to work
-	use 'nvim-lua/plenary.nvim'
-	use 'nvim-telescope/telescope.nvim'
+	use 'itchyny/lightline.vim'
+	use 'morhetz/gruvbox'
+	use 'pangloss/vim-javascript'
+	use 'mxw/vim-jsx'
+
 	use 'jiangmiao/auto-pairs'
 	use 'tpope/vim-unimpaired'
 	use 'tpope/vim-surround'
 	use 'neovim/nvim-lspconfig'
-        use 'tpope/vim-fugitive'
-        use 'nvim-lua/completion-nvim'
+    use 'tpope/vim-fugitive'
+    use 'nvim-lua/completion-nvim'
+	use 'sbdchd/neoformat'
+	use '/usr/local/opt/fzf'
+	use 'junegunn/fzf.vim'
 end)
+
+-- otherwise vim replaces the content of current buffer with the new file you
+-- open. Or maybe deletes the current buffer and creates a new one. Either way,
+-- it makes swithcing between open files quickly a pain in the ass.
+-- If i set the hidden option, i lose the line numbers for some reason. Not 
+-- for every file though. If i open this file, everything's fine. If i open
+-- a directory and then open a js file. Boom!
+vim.o.hidden = true
+-- vim.cmd [[set hidden]]
+-- -- create a vertical split below the current pane
+vim.o.splitbelow = true
+-- -- create a horizontal split to the right of the current pane
+vim.o.splitright = true
+
+-- took me a long time to figure out how to change the leader key in lua
+vim.g.mapleader = " "
 
 -- Appearance
 ------------------------------------------------------------------------
@@ -68,21 +70,27 @@ vim.cmd(
 )
 
 -- colorscheme
-api.nvim_command [[colorscheme onedark]]
+api.nvim_command [[colorscheme gruvbox]]
 
 -- Editing
 -----------------------
 -- doing vim.o.tabstop does not work. tabstop only works as a buffer option when trying to set with meta accessors
 -- ideally, i guess they should be set per buffer depending on the type of file
-vim.bo.tabstop = 2
-vim.bo.shiftwidth = 2
+-- vim.cmd [[set tabstop=4]]
+-- vim.cmd [[set shiftwidth=4]]
+-- vim.cmd [[set smarttab]]
+-- vim.cmd [[autocmd FileType javascript setlocal ts=4 sts=4 sw=4]]
+vim.o.tabstop = 4
+vim.o.shiftwidth = 4
+vim.o.smarttab = true
 -- don't want case sensitive searches
 vim.o.ignorecase = true
 -- but still want search to be smart. If i type a upper case thing, do a case
 -- sensitive search
 vim.o.smartcase = true
 -- In insert mode, on pressing tab, insert 2 spaces
-vim.o.expandtab = true
+-- vim.o.expandtab = true
+-- vim.o.smarttab = true
 -- Use system clipboard
 -- I don't know why this is not the default option. I am missing something.
 -- TODO: Figure out a better way to copy to system clipboard and paste from
@@ -90,8 +98,13 @@ vim.o.expandtab = true
 -- TODO: I think when we do `set clipboard+=unnamedplus`, it's not concatenating
 -- the string 'unnamedplus' to the option clipboard. It's add another value to
 -- some object probably
--- vim.o.clipboard = vim.o.clipboard .. 'unnamedplus'
+vim.o.clipboard = 'unnamedplus'
 
+-- trigger prettier formatting on save
+vim.cmd [[augroup fmt]]
+vim.cmd [[autocmd!]]
+vim.cmd [[autocmd BufWritePre *.js Neoformat prettier]]
+vim.cmd [[augroup END]]
 
 -- Key mappings
 api.nvim_set_keymap('i', 'jk', '<esc>', { noremap = true })
@@ -100,6 +113,8 @@ api.nvim_set_keymap('n', 'k', 'gk', { noremap = true })
 api.nvim_set_keymap('n', 'gk', 'k', { noremap = true })
 api.nvim_set_keymap('n', 'j', 'gj', { noremap = true })
 api.nvim_set_keymap('n', 'gj', 'j', { noremap = true })
+
+api.nvim_set_keymap('n', '<leader>p', '<cmd>Neoformat prettier<CR>', { noremap = true })
 
 -- i always misspell the as teh
 -- iabbrev works in insert mode after i press any non-keyword after entering
@@ -151,22 +166,19 @@ api.nvim_set_keymap('n', '<leader>n', ':NERDTreeToggle<CR>', { noremap = true })
 -- reveal open buffer in NERDTree
 api.nvim_set_keymap('n', '<leader>r', ':NERDTreeFind<CR>', { noremap = true })
 
------- Telescope command mappings ------
+------ file search and find in project command mappings ------
 -- map Ctrl-q (terminals don't recognize ctrl-tab) (recent files) to show all
 -- files in the buffer
-api.nvim_set_keymap('n', '<leader>f', ':Telescope buffers<CR>', { noremap = true })
+api.nvim_set_keymap('n', '<leader>f', ':Buffers<CR>', { noremap = true })
 -- Ctrl-I maps to tab
 -- But it destroys the C-i mapping in vim. Which is used to kind of go in and
 -- used in conjunction with C-o.
--- api.nvim_set_keymap('n', '<C-I>', ':Telescope buffers<CR>', { noremap = true })
+api.nvim_set_keymap('n', '<C-I>', ':Buffers<CR>', { noremap = true })
 -- map ctrlp to open file search
-api.nvim_set_keymap('n', '<C-p>', ':Telescope find_files<CR>', { noremap = true })
--- Doesn't show anything in .gitignore of the project
--- Have used the lua way of invoking the function instead of the custom
--- sugar Telescope commands. 
--- Here's the list of all builtins - https://github.com/nvim-telescope/telescope.nvim#built-in-pickers
-api.nvim_set_keymap('n', '<C-t>', ':lua require("telescope.builtin").git_files()<CR>', { noremap = true })
-api.nvim_set_keymap('n', '<leader>fg', ':Telescope live_grep<CR>', { noremap = true })
+api.nvim_set_keymap('n', '<C-p>', ':Files<CR>', { noremap = true })
+api.nvim_set_keymap('n', '<C-t>', ':GFiles<CR>', { noremap = true })
+api.nvim_set_keymap('n', '<leader>fg', ':Rg!', { noremap = true })
+api.nvim_set_keymap('n', '<leader>a', ":exe 'Rg!' expand('<cword')<CR>", { noremap = true })
 
 -- NERDCommenter
 -- shortcuts to toggle comment
@@ -280,16 +292,21 @@ api.nvim_exec (
 
 -- the live_grep default implementation is slow. Get's stuck between typing.
 -- Enabling the fzf_writer extension makes it better
-require('telescope').setup {
-    extensions = {
-        fzf_writer = {
-            minimum_grep_characters = 2,
-            minimum_files_characters = 2,
+-- require('telescope').setup {
+    -- extensions = {
+        -- fzf_writer = {
+            -- minimum_grep_characters = 2,
+            -- minimum_files_characters = 2,
 
-            -- Disabled by default.
-            -- Will probably slow down some aspects of the sorter, but can make color highlights.
-            -- I will work on this more later.
-            use_highlighter = false,
-        }
-    }
-}
+            -- -- Disabled by default.
+            -- -- Will probably slow down some aspects of the sorter, but can make color highlights.
+            -- -- I will work on this more later.
+            -- use_highlighter = false,
+        -- },
+		-- fzy_native = {
+			-- override_generic_sorter = true,
+			-- override_file_sorter = true
+		-- }
+    -- }
+-- }
+-- require('telescope').load_extension('fzy_native')
