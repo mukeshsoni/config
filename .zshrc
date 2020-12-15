@@ -31,3 +31,5 @@ export BAT_THEME="Dracula"
 alias config='/usr/bin/git --git-dir=/Users/msoni/.myconfig/ --work-tree=/Users/msoni'
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'
