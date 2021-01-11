@@ -17,18 +17,20 @@ require('packer').startup(function()
 	use 'morhetz/gruvbox'
 	use 'pangloss/vim-javascript'
 	use 'mxw/vim-jsx'
+	use 'jxnblk/vim-mdx-js'
 
 	use 'jiangmiao/auto-pairs'
+	use 'alvan/vim-closetag'
 	use 'tpope/vim-unimpaired'
 	use 'tpope/vim-surround'
 	use 'neovim/nvim-lspconfig'
     use 'tpope/vim-fugitive'
     use 'nvim-lua/completion-nvim'
-	use 'sbdchd/neoformat'
 	use '/usr/local/opt/fzf'
 	use 'junegunn/fzf.vim'
 end)
 
+vim.cmd [[set mouse=a]]
 -- otherwise vim replaces the content of current buffer with the new file you
 -- open. Or maybe deletes the current buffer and creates a new one. Either way,
 -- it makes swithcing between open files quickly a pain in the ass.
@@ -41,6 +43,7 @@ vim.o.hidden = true
 vim.o.splitbelow = true
 -- -- create a horizontal split to the right of the current pane
 vim.o.splitright = true
+vim.cmd [[set termguicolors]]
 
 -- took me a long time to figure out how to change the leader key in lua
 vim.g.mapleader = " "
@@ -54,13 +57,13 @@ vim.wo.relativenumber = true
 -- but we don't want pure relative line numbering. The line where the cursor is 
 -- should show absolute line number
 vim.wo.number = true
--- show a bar on column 80. Going beyond 80 chars per line gets hard to read.
--- I have a linting rule in most of my projects to keep line limit to 80 chars.
+-- show a bar on column 120. Going beyond 120 chars per line gets hard to read.
+-- I have a linting rule in most of my projects to keep line limit to 120 chars.
 -- I had no idea that colorcolumn is a window option
 -- Tip: One way to find whether an option is global or window or buffer
 -- try vim.o.<option_name> = 'blah' and run ex command :luafile %
 -- It will tell you what the real type of the option_name should be
-vim.wo.colorcolumn = '80'
+vim.wo.colorcolumn = '120'
 
 -- maintain undo history between sessions
 vim.cmd(
@@ -101,20 +104,17 @@ vim.o.smartcase = true
 vim.o.clipboard = 'unnamedplus'
 
 -- trigger prettier formatting on save
-vim.cmd [[augroup fmt]]
-vim.cmd [[autocmd!]]
-vim.cmd [[autocmd BufWritePre *.js Neoformat prettier]]
-vim.cmd [[augroup END]]
+-- vim.cmd [[augroup fmt]]
+-- vim.cmd [[autocmd!]]
+-- vim.cmd [[augroup END]]
 
 -- Key mappings
-api.nvim_set_keymap('i', 'jk', '<esc>', { noremap = true })
+api.nvim_set_keymap('i', 'jj', '<esc>', { noremap = true })
 -- remap j and k to move across display lines and not real lines
 api.nvim_set_keymap('n', 'k', 'gk', { noremap = true })
 api.nvim_set_keymap('n', 'gk', 'k', { noremap = true })
 api.nvim_set_keymap('n', 'j', 'gj', { noremap = true })
 api.nvim_set_keymap('n', 'gj', 'j', { noremap = true })
-
-api.nvim_set_keymap('n', '<leader>p', '<cmd>Neoformat prettier<CR>', { noremap = true })
 
 -- i always misspell the as teh
 -- iabbrev works in insert mode after i press any non-keyword after entering
@@ -173,7 +173,7 @@ api.nvim_set_keymap('n', '<leader>f', ':Buffers<CR>', { noremap = true })
 -- Ctrl-I maps to tab
 -- But it destroys the C-i mapping in vim. Which is used to kind of go in and
 -- used in conjunction with C-o.
-api.nvim_set_keymap('n', '<C-I>', ':Buffers<CR>', { noremap = true })
+api.nvim_set_keymap('n', '<C-b>', ':Buffers<CR>', { noremap = true })
 -- map ctrlp to open file search
 api.nvim_set_keymap('n', '<C-p>', ':Files<CR>', { noremap = true })
 api.nvim_set_keymap('n', '<C-t>', ':GFiles<CR>', { noremap = true })
@@ -197,7 +197,7 @@ api.nvim_set_keymap('n', '1gD', '<cmd>lua vim.lsp.buf.type_definition()<CR>', { 
 api.nvim_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', { noremap = true, silent = true })
 api.nvim_set_keymap('n', 'g0', '<cmd>lua vim.lsp.buf.document_symbol()<CR>', { noremap = true, silent = true })
 api.nvim_set_keymap('n', 'gW', '<cmd>lua vim.lsp.buf.workspace_symbol()<CR>', { noremap = true, silent = true })
-api.nvim_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.declaration()<CR>', { noremap = true, silent = true })
+api.nvim_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', { noremap = true, silent = true })
 api.nvim_set_keymap('n', ']g', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', { noremap = true, silent = true })
 api.nvim_set_keymap('n', '[g', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', { noremap = true, silent = true })
 
@@ -214,6 +214,13 @@ require'lspconfig'.flow.setup{
         on_attach = require'completion'.on_attach
 }
 
+local on_attach_python = function(client)
+	require'completion'.on_attach(client)
+	require'completion'.on_attach(client)
+end
+
+require'lspconfig'.pyls.setup{ on_attach = on_attach_python }
+
 ------ Commands ------
 -- There is not api to set a command directly
 -- But there's an api to execute random vimscript - vim.nvim_exec
@@ -221,6 +228,7 @@ require'lspconfig'.flow.setup{
 -- The second argument says if we want the return value from the executed 
 -- vimscript
 vim.cmd('command! Vimrc :sp $MYVIMRC')
+
 
 ------ Nerd commenter ------
 --
@@ -290,6 +298,8 @@ api.nvim_exec (
 ]], false
 )
 
+vim.cmd [[ set grepprg=rg\ --vimgrep ]]
+
 -- the live_grep default implementation is slow. Get's stuck between typing.
 -- Enabling the fzf_writer extension makes it better
 -- require('telescope').setup {
@@ -310,3 +320,9 @@ api.nvim_exec (
     -- }
 -- }
 -- require('telescope').load_extension('fzy_native')
+
+-- Gstatus or git status in vim-fugitive
+api.nvim_set_keymap('n', '<leader>gs', ':G<CR>', { noremap = true })
+
+-- mapping to format file using prettier installed inside projectplace frontend/harmony folder
+vim.cmd [[nnoremap <leader>p :silent !/Volumes/code-case-sensitive/code/main_service/frontend/harmony/node_modules/.bin/prettier --write %<CR>]]
