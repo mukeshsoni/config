@@ -1,5 +1,17 @@
 autoload -U colors && colors
 
+autoload -Uz compinit 
+# initialize auto completion. We use -i to tell compinit to not worry about
+# insecure directories. Solution from this github issue -
+# https://github.com/zsh-users/zsh-completions/issues/680#issuecomment-647037301
+if [ "$(whoami)" = "msoni" ]; then
+	compinit -i # Ignore insecure directories
+else
+	compinit
+fi
+
+# zmodload -i zsh/complist
+
 alias gst='git status'
 alias gpr='git pull --rebase'
 alias gps='git push'
