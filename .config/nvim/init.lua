@@ -202,6 +202,28 @@ api.nvim_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', { norema
 api.nvim_set_keymap('n', ']g', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', { noremap = true, silent = true })
 api.nvim_set_keymap('n', '[g', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', { noremap = true, silent = true })
 
+require'compe'.setup {
+  enabled = true;
+  autocomplete = true;
+  debug = false;
+  min_length = 1;
+  preselect = 'enable';
+  throttle_time = 80;
+  source_timeout = 200;
+  incomplete_delay = 400;
+  allow_prefix_unmatch = false;
+
+  source = {
+    path = true;
+    buffer = true;
+    vsnip = true;
+    lamp = true;
+    nvim_lsp = true;
+    nvim_lua = true;
+    spell = true;
+    snippets_nvim = true;
+  };
+}
 -- setup lsp client
 local on_attach = function(client)
 	-- require'completion'.on_attach(client)
