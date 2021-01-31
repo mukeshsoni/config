@@ -26,7 +26,6 @@ require('packer').startup(function()
 	use 'neovim/nvim-lspconfig'
     use 'tpope/vim-fugitive'
 	use 'hrsh7th/nvim-compe'
-	use 'glepnir/lspsaga.nvim'
 	use '/usr/local/opt/fzf'
 	use 'junegunn/fzf.vim'
 end)
@@ -240,7 +239,7 @@ local on_attach = function(client)
 		buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
 	end
 
-	-- Set autocommands conditional on server_capabilities
+	Set autocommands conditional on server_capabilities
 	if client.resolved_capabilities.document_highlight then
 		vim.api.nvim_exec([[
 		hi LspReferenceRead cterm=bold ctermbg=red guibg=LightYellow
@@ -369,7 +368,3 @@ api.nvim_set_keymap('n', '<leader>gs', ':G<CR>', { noremap = true })
 
 -- mapping to format file using prettier installed inside projectplace frontend/harmony folder
 vim.cmd [[nnoremap <leader>p :silent %!/Volumes/code-case-sensitive/code/main_service/frontend/harmony/node_modules/.bin/prettier --stdin-filepath %<CR>]]
-
-local saga = require 'lspsaga'
-saga.init_lsp_saga()
-
