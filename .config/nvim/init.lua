@@ -25,7 +25,8 @@ require('packer').startup(function()
 	use 'tpope/vim-surround'
 	use 'neovim/nvim-lspconfig'
     use 'tpope/vim-fugitive'
-    use 'nvim-lua/completion-nvim'
+	use 'hrsh7th/nvim-compe'
+	use 'glepnir/lspsaga.nvim'
 	use '/usr/local/opt/fzf'
 	use 'junegunn/fzf.vim'
 end)
@@ -109,7 +110,7 @@ vim.o.clipboard = 'unnamedplus'
 -- vim.cmd [[augroup END]]
 
 -- Key mappings
-api.nvim_set_keymap('i', 'jj', '<esc>', { noremap = true })
+api.nvim_set_keymap('i', 'jk', '<esc>', { noremap = true })
 -- remap j and k to move across display lines and not real lines
 api.nvim_set_keymap('n', 'k', 'gk', { noremap = true })
 api.nvim_set_keymap('n', 'gk', 'k', { noremap = true })
@@ -202,24 +203,20 @@ api.nvim_set_keymap('n', ']g', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', { 
 api.nvim_set_keymap('n', '[g', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', { noremap = true, silent = true })
 
 -- setup lsp client
+local on_attach = function(client)
+	-- require'completion'.on_attach(client)
+	-- require'completion'.on_attach(client)
+	-- require'compe'.on_attach(client)
+end
 
-api.nvim_command(
-[[
-let g:completion_enable_auto_popup = 0
-]])
-
+vim.o.completeopt = "menu,menuone,noselect"
 require'lspconfig'.flow.setup{
         -- because we want to run the locally installed flow binary version
         -- cmd = { "yarn", "flow", "lsp" },
-        on_attach = require'completion'.on_attach
+		on_attach = on_attach
 }
-
-local on_attach_python = function(client)
-	require'completion'.on_attach(client)
-	require'completion'.on_attach(client)
-end
-
-require'lspconfig'.pyls.setup{ on_attach = on_attach_python }
+require'lspconfig'.tsserver.setup { on_attach = on_attach }
+require'lspconfig'.pyls.setup{ on_attach = on_attach }
 
 ------ Commands ------
 -- There is not api to set a command directly
@@ -325,4 +322,8 @@ vim.cmd [[ set grepprg=rg\ --vimgrep ]]
 api.nvim_set_keymap('n', '<leader>gs', ':G<CR>', { noremap = true })
 
 -- mapping to format file using prettier installed inside projectplace frontend/harmony folder
-vim.cmd [[nnoremap <leader>p :silent !/Volumes/code-case-sensitive/code/main_service/frontend/harmony/node_modules/.bin/prettier --write %<CR>]]
+vim.cmd [[nnoremap <leader>p :silent %!/Volumes/code-case-sensitive/code/main_service/frontend/harmony/node_modules/.bin/prettier --stdin-filepath %<CR>]]
+
+local saga = require 'lspsaga'
+saga.init_lsp_saga()
+
