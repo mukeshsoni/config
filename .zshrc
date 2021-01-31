@@ -9,8 +9,7 @@ if [ "$(whoami)" = "msoni" ]; then
 else
 	compinit
 fi
-
-# zmodload -i zsh/complist
+zmodload -i zsh/complist
 
 alias gst='git status'
 alias gpr='git pull --rebase'
@@ -45,3 +44,6 @@ alias config='/usr/bin/git --git-dir=/Users/msoni/.myconfig/ --work-tree=/Users/
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'
+
+[[ -s "/Users/msoni/.projectplace/bin/pptool-init.sh" ]] && source "/Users/msoni/.projectplace/bin/pptool-init.sh"
+
