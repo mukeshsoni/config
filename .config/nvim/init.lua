@@ -239,7 +239,7 @@ local on_attach = function(client)
 		buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
 	end
 
-	Set autocommands conditional on server_capabilities
+	-- Set autocommands conditional on server_capabilities
 	if client.resolved_capabilities.document_highlight then
 		vim.api.nvim_exec([[
 		hi LspReferenceRead cterm=bold ctermbg=red guibg=LightYellow
@@ -255,11 +255,7 @@ local on_attach = function(client)
 end
 
 vim.o.completeopt = "menu,menuone,noselect"
-require'lspconfig'.flow.setup{
-        -- because we want to run the locally installed flow binary version
-        -- cmd = { "yarn", "flow", "lsp" },
-		on_attach = on_attach
-}
+require'lspconfig'.flow.setup{ on_attach = on_attach }
 require'lspconfig'.tsserver.setup { on_attach = on_attach }
 require'lspconfig'.pyls.setup{ on_attach = on_attach }
 
@@ -368,3 +364,5 @@ api.nvim_set_keymap('n', '<leader>gs', ':G<CR>', { noremap = true })
 
 -- mapping to format file using prettier installed inside projectplace frontend/harmony folder
 vim.cmd [[nnoremap <leader>p :silent %!/Volumes/code-case-sensitive/code/main_service/frontend/harmony/node_modules/.bin/prettier --stdin-filepath %<CR>]]
+
+vim.cmd [[let g:fugitive_pty = 0]]
