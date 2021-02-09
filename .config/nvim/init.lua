@@ -1,5 +1,6 @@
 local vim = vim
 local api = vim.api
+local lspconfig = require "lspconfig"
 
 -- this initializes jhe packer plugin manager
 api.nvim_command [[packadd packer.nvim]]
@@ -69,8 +70,8 @@ vim.wo.colorcolumn = "120"
 
 -- maintain undo history between sessions
 vim.cmd([[
-		set undofile
-	]])
+set undofile
+]])
 
 -- colorscheme
 api.nvim_command [[colorscheme gruvbox]]
@@ -236,9 +237,10 @@ local on_attach = function(client)
 
   -- Set some keybinds conditional on server capabilities
   if client.resolved_capabilities.document_formatting then
-    buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+    print("setting shortcut for formatting")
+    buf_set_keymap("n", "<leader>=", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
   elseif client.resolved_capabilities.document_range_formatting then
-    buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+    buf_set_keymap("n", "<leader>=", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
   end
 
   -- Set autocommands conditional on server_capabilities
@@ -260,9 +262,57 @@ local on_attach = function(client)
 end
 
 vim.o.completeopt = "menu,menuone,noselect"
-require "lspconfig".flow.setup {on_attach = on_attach}
--- require'lspconfig'.tsserver.setup { on_attach = on_attach }
-require "lspconfig".pyls.setup {on_attach = on_attach}
+lspconfig.flow.setup {on_attach = on_attach}
+-- lspconfig.tsserver.setup { on_attach = on_attach }
+lspconfig.pyls.setup {on_attach = on_attach}
+local eslint_d = {
+  lintCommand = "eslint_d -f unix --stdin --stdin-filename ${INPUT}",
+  lintStdin = true,
+  lintFormats = {"%f:%l:%c: %m"},
+  lintIgnoreExitCode = true
+  -- formatCommand = "eslint_d --fix-to-stdout --stdin --stdin-filename=${INPUT}",
+  -- formatStdin = true
+}
+-- prettier or eslint --fix is not working with neovim lsp
+-- calling :lua vim.lsp.buf.formatting() should have worked, but never did
+-- I don't know how to debug that
+-- local prettier = {
+-- formatCommand = "prettier --stdin --stdin-filepath ${INPUT}",
+-- formatStdin = true
+-- }
+
+-- to use efm-langserver and eslint_d, those need to be installed globally
+-- brew install efm-langserver
+-- npm install -g eslint_d
+lspconfig.efm.setup {
+  on_attach = on_attach,
+  root_dir = function()
+    return vim.fn.getcwd()
+  end,
+  init_options = {
+    documentFormatting = false,
+    codeAction = true
+  },
+  settings = {
+    lintDebounce = 500,
+    languages = {
+      javascript = {eslint_d},
+      javascriptreact = {eslint_d},
+      ["javascript.jsx"] = {eslint_d},
+      typescript = {eslint_d},
+      typescriptreact = {eslint_d},
+      ["typescript.tsx"] = {eslint_d}
+    }
+  },
+  filetypes = {
+    "javascript",
+    "javascriptreact",
+    "javascript.jsx",
+    "typescript",
+    "typescriptreact",
+    "typescript.tsx"
+  }
+}
 
 ------ Commands ------
 -- There is not api to set a command directly
@@ -333,10 +383,10 @@ api.nvim_set_var("NERDSpaceDelims", 1)
 -- and vim.api.nvim_exec
 api.nvim_exec(
   [[
-	augroup highlight_yank
-			autocmd!
-			au TextYankPost * silent! lua vim.highlight.on_yank { higroup='IncSearch', timeout=200 }
-	augroup END
+augroup highlight_yank
+autocmd!
+au TextYankPost * silent! lua vim.highlight.on_yank { higroup='IncSearch', timeout=200 }
+augroup END
 ]],
   false
 )
@@ -384,7 +434,7 @@ require("formatter").setup(
   {
     logging = false,
     filetype = {
-      javascriptreact = {
+      javascript = {
         -- prettier
         function()
           return {
@@ -394,7 +444,7 @@ require("formatter").setup(
           }
         end
       },
-      javascript = {
+      javascriptreact = {
         -- prettier
         function()
           return {
@@ -431,10 +481,10 @@ require("formatter").setup(
 -- format on save
 vim.api.nvim_exec(
   [[
-augroup FormatAutogroup
+  augroup FormatAutogroup
   autocmd!
   autocmd BufWritePost *.js,*.jsx,*.ts,*.tsx,*.rs,*.lua FormatWrite
-augroup END
-]],
+  augroup END
+  ]],
   true
 )
