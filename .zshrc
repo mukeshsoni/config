@@ -1,3 +1,6 @@
+autoload bashcompinit
+bashcompinit
+
 autoload -U colors && colors
 
 autoload -Uz compinit 
@@ -47,3 +50,7 @@ export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.g
 
 [[ -s "/Users/msoni/.projectplace/bin/pptool-init.sh" ]] && source "/Users/msoni/.projectplace/bin/pptool-init.sh"
 
+# control-b to move back a word on command line
+bindkey "^b" backward-word
+# control-f to move forward a word on command line
+bindkey "^f" forward-word
