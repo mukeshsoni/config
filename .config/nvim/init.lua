@@ -30,6 +30,7 @@ require("packer").startup(
     use "/usr/local/opt/fzf"
     use "junegunn/fzf.vim"
     use "mhartington/formatter.nvim"
+    use "mattn/efm-langserver"
   end
 )
 
@@ -207,7 +208,7 @@ require "compe".setup {
   }
 }
 -- setup lsp client
-local on_attach = function(client)
+local on_attach = function(client, bufnr)
   local function buf_set_keymap(...)
     vim.api.nvim_buf_set_keymap(bufnr, ...)
   end
@@ -237,28 +238,27 @@ local on_attach = function(client)
 
   -- Set some keybinds conditional on server capabilities
   if client.resolved_capabilities.document_formatting then
-    print("setting shortcut for formatting")
     buf_set_keymap("n", "<leader>=", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
   elseif client.resolved_capabilities.document_range_formatting then
     buf_set_keymap("n", "<leader>=", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
   end
 
   -- Set autocommands conditional on server_capabilities
-  if client.resolved_capabilities.document_highlight then
-    vim.api.nvim_exec(
-      [[
-		hi LspReferenceRead cterm=bold ctermbg=red guibg=LightYellow
-		hi LspReferenceText cterm=bold ctermbg=red guibg=LightYellow
-		hi LspReferenceWrite cterm=bold ctermbg=red guibg=LightYellow
-		augroup lsp_document_highlight
-		autocmd!
-		autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
-		autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
-		augroup END
-		]],
-      false
-    )
-  end
+  -- if client.resolved_capabilities.document_highlight then
+  -- vim.api.nvim_exec(
+  -- [[
+  -- hi LspReferenceRead cterm=bold ctermbg=red guibg=LightYellow
+  -- hi LspReferenceText cterm=bold ctermbg=red guibg=LightYellow
+  -- hi LspReferenceWrite cterm=bold ctermbg=red guibg=LightYellow
+  -- augroup lsp_document_highlight
+  -- autocmd!
+  -- autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
+  -- autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
+  -- augroup END
+  -- ]],
+  -- false
+  -- )
+  -- end
 end
 
 vim.o.completeopt = "menu,menuone,noselect"
@@ -276,10 +276,10 @@ local eslint_d = {
 -- prettier or eslint --fix is not working with neovim lsp
 -- calling :lua vim.lsp.buf.formatting() should have worked, but never did
 -- I don't know how to debug that
--- local prettier = {
--- formatCommand = "prettier --stdin --stdin-filepath ${INPUT}",
--- formatStdin = true
--- }
+local prettier = {
+  formatCommand = "prettier --stdin --stdin-filepath ${INPUT}",
+  formatStdin = true
+}
 
 -- to use efm-langserver and eslint_d, those need to be installed globally
 -- brew install efm-langserver
@@ -290,7 +290,7 @@ lspconfig.efm.setup {
     return vim.fn.getcwd()
   end,
   init_options = {
-    documentFormatting = false,
+    documentFormatting = true,
     codeAction = true
   },
   settings = {
