@@ -31,6 +31,7 @@ require("packer").startup(
     use "junegunn/fzf.vim"
     use "mhartington/formatter.nvim"
     use "mattn/efm-langserver"
+    use "folke/which-key.nvim"
   end
 )
 
@@ -263,6 +264,7 @@ end
 
 vim.o.completeopt = "menu,menuone,noselect"
 lspconfig.flow.setup {on_attach = on_attach}
+-- lspconfig.tsserver.setup {on_attach = on_attach}
 -- lspconfig.tsserver.setup { on_attach = on_attach }
 lspconfig.pyls.setup {on_attach = on_attach}
 local eslint_d = {
@@ -434,6 +436,26 @@ require("formatter").setup(
   {
     logging = false,
     filetype = {
+      typescriptreact = {
+        -- prettier
+        function()
+          return {
+            exe = "prettier",
+            args = {"--stdin-filepath", vim.api.nvim_buf_get_name(0), "--single-quote"},
+            stdin = true
+          }
+        end
+      },
+      typescript = {
+        -- prettier
+        function()
+          return {
+            exe = "prettier",
+            args = {"--stdin-filepath", vim.api.nvim_buf_get_name(0), "--single-quote"},
+            stdin = true
+          }
+        end
+      },
       javascript = {
         -- prettier
         function()
@@ -488,3 +510,5 @@ vim.api.nvim_exec(
   ]],
   true
 )
+
+-- require("which-key").setup {}
