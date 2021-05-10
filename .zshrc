@@ -54,17 +54,22 @@ export PATH=$PATH:~/.projectplace/bin
 [[ -s "/Users/msoni/.projectplace/bin/pptool-init.sh" ]] && source "/Users/msoni/.projectplace/bin/pptool-init.sh"
 
 # very simple prompt. We will zazz it up with a right hand section somewhere below.
-PROMPT='%(?.%F{green}√.%F{red}?%?)%f %B%F{50}%2~%f%b %# '
+# PROMPT='%(?.%F{green}√.%F{red}?%?)%f %B%F{50}%2~%f%b %# '
 # Let add a right hand section to the prompt. With some git information.
 # RPROMPT is the variable which shows up as the right hand section in the prompt.
-autoload -Uz vcs_info
-precmd_vcs_info() { vcs_info }
-precmd_functions+=( precmd_vcs_info )
-setopt prompt_subst
-RPROMPT=\$vcs_info_msg_0_
+# autoload -Uz vcs_info
+# precmd_vcs_info() { vcs_info }
+# precmd_functions+=( precmd_vcs_info )
+# setopt prompt_subst
+# RPROMPT=\$vcs_info_msg_0_
 # PROMPT=\$vcs_info_msg_0_'%# '
-zstyle ':vcs_info:git:*' formats '%F{30}(%b)%r%f'
-zstyle ':vcs_info:*' enable git
+# zstyle ':vcs_info:git:*' formats '%F{30}(%b)%r%f'
+# zstyle ':vcs_info:*' enable git
+
+# nice but fast prompt - https://github.com/sindresorhus/pure#getting-started
+# This will only work if we have sindresorhus/pure installed globally
+autoload -U promptinit; promptinit
+prompt pure
 
 # specially for the bat command. It's an alternate to cat command to view contents of a file. 
 # bat can display the files with syntax highlighting and all. Which is why we are setting a 
