@@ -1,40 +1,10 @@
 local vim = vim
 local api = vim.api
-local lspconfig = require "lspconfig"
 
--- this initializes jhe packer plugin manager
-api.nvim_command [[packadd packer.nvim]]
+-- needed by nvim-compe
+vim.o.completeopt = "menuone,noselect"
 
--- plugins
-require("packer").startup(
-  function()
-    use {"wbthomason/packer.nvim", opt = true}
-    -- navigating the file tree
-    use "preservim/nerdtree"
-    -- for easily changing a line to comment
-    use "preservim/nerdcommenter"
-    -- Colorscheme
-    use "itchyny/lightline.vim"
-    use "morhetz/gruvbox"
-    use "pangloss/vim-javascript"
-    use "MaxMEllon/vim-jsx-pretty"
-    use "jxnblk/vim-mdx-js"
-
-    use "jiangmiao/auto-pairs"
-    use "alvan/vim-closetag"
-    use "tpope/vim-unimpaired"
-    use "tpope/vim-surround"
-    use "neovim/nvim-lspconfig"
-    use "tpope/vim-fugitive"
-    use "hrsh7th/nvim-compe"
-    use "/usr/local/opt/fzf"
-    use "junegunn/fzf.vim"
-    use "mhartington/formatter.nvim"
-    use "mattn/efm-langserver"
-    use "folke/which-key.nvim"
-  end
-)
-
+-- i sometimes use the mouse to scroll through a buffer
 vim.cmd [[set mouse=a]]
 -- otherwise vim replaces the content of current buffer with the new file you
 -- open. Or maybe deletes the current buffer and creates a new one. Either way,
@@ -43,15 +13,57 @@ vim.cmd [[set mouse=a]]
 -- for every file though. If i open this file, everything's fine. If i open
 -- a directory and then open a js file. Boom!
 vim.o.hidden = true
--- vim.cmd [[set hidden]]
--- -- create a vertical split below the current pane
-vim.o.splitbelow = true
--- -- create a horizontal split to the right of the current pane
-vim.o.splitright = true
-vim.cmd [[set termguicolors]]
-
+vim.cmd [[set report=2]]
 -- took me a long time to figure out how to change the leader key in lua
 vim.g.mapleader = " "
+
+require("packer").startup(
+  function()
+    -- Packer can manage itself
+    -- navigating the file tree
+    use "preservim/nerdtree"
+    -- for easily changing a line to comment
+    use "preservim/nerdcommenter"
+    use "wbthomason/packer.nvim"
+
+    -- navigating the file tree
+
+    use "/usr/local/opt/fzf"
+    use "junegunn/fzf.vim"
+    use "neovim/nvim-lspconfig"
+    -- Colorscheme
+    use "itchyny/lightline.vim"
+    use "morhetz/gruvbox"
+    use "pangloss/vim-javascript"
+    use "MaxMEllon/vim-jsx-pretty"
+
+    use "jiangmiao/auto-pairs"
+    use "alvan/vim-closetag"
+    use "tpope/vim-unimpaired"
+    use "tpope/vim-surround"
+    -- auto format files. E.g. format js files using typescript.
+    use "mhartington/formatter.nvim"
+    use "tpope/vim-fugitive"
+    use "airblade/vim-gitgutter"
+    use "hrsh7th/nvim-compe"
+    use "mattn/efm-langserver"
+    -- TODO - find some way to verify that vsnip works
+    -- TODO - Also verify if nvim-compe works with vsnip. I don't know how they work together.
+    use "hrsh7th/vim-vsnip"
+    use "hrsh7th/vim-vsnip-integ"
+  end
+)
+
+local lspconfig = require "lspconfig"
+
+-- colorscheme
+vim.cmd [[set termguicolors]]
+api.nvim_command [[colorscheme gruvbox]]
+
+-- so that vim-closetag works for jsx inside javascript files
+vim.cmd [[
+let g:closetag_filetypes = 'html,xhtml,jsx,javascript,typescript.tsx'
+]]
 
 -- Appearance
 ------------------------------------------------------------------------
@@ -74,9 +86,6 @@ vim.wo.colorcolumn = "120"
 vim.cmd([[
 set undofile
 ]])
-
--- colorscheme
-api.nvim_command [[colorscheme gruvbox]]
 
 -- Editing
 -----------------------
@@ -106,11 +115,6 @@ vim.o.smartcase = true
 -- some object probably
 vim.o.clipboard = "unnamedplus"
 
--- trigger prettier formatting on save
--- vim.cmd [[augroup fmt]]
--- vim.cmd [[autocmd!]]
--- vim.cmd [[augroup END]]
-
 -- Key mappings
 api.nvim_set_keymap("i", "jk", "<esc>", {noremap = true})
 -- remap j and k to move across display lines and not real lines
@@ -123,15 +127,6 @@ api.nvim_set_keymap("n", "gj", "j", {noremap = true})
 -- iabbrev works in insert mode after i press any non-keyword after entering
 -- the letter
 vim.cmd [[iabbrev teh the]]
-
--- Let's make & to trigger :&&, which preserves substitution flags when
--- rerunning a substitute, which is what we want most of the times
-api.nvim_set_keymap("n", "&", ":&&<CR>", {noremap = true})
-api.nvim_set_keymap("x", "&", ":&&<CR>", {noremap = true})
-
--- expand with current file path. Picked from practical vim.
--- Try out :e %%
-api.nvim_set_keymap("c", "%%", "getcmdtype() == ':' ? expand('%:h').'/' : '%%'", {noremap = true, expr = true})
 
 -- I like my cmd+s for saving files. In insert mode!
 -- The terminal (or iterm) does not have support for anything related to
@@ -150,173 +145,6 @@ api.nvim_set_keymap("n", "<C-l>", ":<C-u>noh<CR><C-l>", {noremap = true, silent 
 -- like any other vim buffer and can be switched or deleted or whatever
 api.nvim_set_keymap("t", "<esc>", ":<C-\\><C-n>", {noremap = true})
 
--- open vimrc
-api.nvim_set_keymap("n", "<leader>ev", ":split $MYVIMRC<CR>", {noremap = true})
--- Source my vimrc file
--- TODO: i don't know how to source a lua file
--- source /path/to/lua does not work
-api.nvim_set_keymap("n", "<leader>sv", ":source $MYVIMRC<CR>", {noremap = true})
-
--- open my vimrc file in a split pane
--- command! Vimrc :sp $MYVIMRC
--- TODO: Don't know how to define a command from lua
-
------- NerdTree configuration ------
-
--- toggle NERDTree show/hide using <C-n> and <leader>n
-api.nvim_set_keymap("n", "<leader>n", ":NERDTreeToggle<CR>", {noremap = true})
--- reveal open buffer in NERDTree
-api.nvim_set_keymap("n", "<leader>r", ":NERDTreeFind<CR>", {noremap = true})
-
------- file search and find in project command mappings ------
--- map Ctrl-q (terminals don't recognize ctrl-tab) (recent files) to show all
--- files in the buffer
-api.nvim_set_keymap("n", "<leader>f", ":Buffers<CR>", {noremap = true})
--- Ctrl-I maps to tab
--- But it destroys the C-i mapping in vim. Which is used to kind of go in and
--- used in conjunction with C-o.
-api.nvim_set_keymap("n", "<C-b>", ":Buffers<CR>", {noremap = true})
--- map ctrlp to open file search
-api.nvim_set_keymap("n", "<C-p>", ":Files<CR>", {noremap = true})
-api.nvim_set_keymap("n", "<C-t>", ":GFiles<CR>", {noremap = true})
-api.nvim_set_keymap("n", "<leader>fg", ":Rg!", {noremap = true})
-api.nvim_set_keymap("n", "<leader>a", ":exe 'Rg!' expand('<cword')<CR>", {noremap = true})
-
--- NERDCommenter
--- shortcuts to toggle comment
-api.nvim_set_keymap("n", ",c", ':call NERDComment(0, "toggle")<CR>', {noremap = true})
-api.nvim_set_keymap("v", ",c", ':call NERDComment(0, "toggle")<CR>', {noremap = true})
-
-require "compe".setup {
-  enabled = true,
-  autocomplete = true,
-  debug = false,
-  min_length = 1,
-  preselect = "enable",
-  throttle_time = 80,
-  source_timeout = 200,
-  incomplete_delay = 400,
-  allow_prefix_unmatch = false,
-  source = {
-    path = true,
-    buffer = true,
-    vsnip = true,
-    lamp = true,
-    nvim_lsp = true,
-    nvim_lua = true,
-    spell = true,
-    snippets_nvim = true
-  }
-}
--- setup lsp client
-local on_attach = function(client, bufnr)
-  local function buf_set_keymap(...)
-    vim.api.nvim_buf_set_keymap(bufnr, ...)
-  end
-  local function buf_set_option(...)
-    vim.api.nvim_buf_set_option(bufnr, ...)
-  end
-
-  buf_set_option("omnifunc", "v:lua.vim.lsp.omnifunc")
-
-  -- Mappings.
-  local opts = {noremap = true, silent = true}
-  buf_set_keymap("n", "gD", "<Cmd>lua vim.lsp.buf.declaration()<CR>", opts)
-  buf_set_keymap("n", "gd", "<Cmd>lua vim.lsp.buf.definition()<CR>", opts)
-  buf_set_keymap("n", "K", "<Cmd>lua vim.lsp.buf.hover()<CR>", opts)
-  buf_set_keymap("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", opts)
-  buf_set_keymap("n", "<C-k>", "<cmd>lua vim.lsp.buf.signature_help()<CR>", opts)
-  buf_set_keymap("n", "<space>wa", "<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>", opts)
-  buf_set_keymap("n", "<space>wr", "<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>", opts)
-  buf_set_keymap("n", "<space>wl", "<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>", opts)
-  buf_set_keymap("n", "<space>D", "<cmd>lua vim.lsp.buf.type_definition()<CR>", opts)
-  buf_set_keymap("n", "<space>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", opts)
-  buf_set_keymap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
-  buf_set_keymap("n", "<space>e", "<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>", opts)
-  buf_set_keymap("n", "[d", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>", opts)
-  buf_set_keymap("n", "]d", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>", opts)
-  buf_set_keymap("n", "<space>q", "<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
-
-  -- Set some keybinds conditional on server capabilities
-  if client.resolved_capabilities.document_formatting then
-    buf_set_keymap("n", "<leader>=", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
-  elseif client.resolved_capabilities.document_range_formatting then
-    buf_set_keymap("n", "<leader>=", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
-  end
-
-  -- Set autocommands conditional on server_capabilities
-  -- if client.resolved_capabilities.document_highlight then
-  -- vim.api.nvim_exec(
-  -- [[
-  -- hi LspReferenceRead cterm=bold ctermbg=red guibg=LightYellow
-  -- hi LspReferenceText cterm=bold ctermbg=red guibg=LightYellow
-  -- hi LspReferenceWrite cterm=bold ctermbg=red guibg=LightYellow
-  -- augroup lsp_document_highlight
-  -- autocmd!
-  -- autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
-  -- autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
-  -- augroup END
-  -- ]],
-  -- false
-  -- )
-  -- end
-end
-
-vim.o.completeopt = "menu,menuone,noselect"
-lspconfig.flow.setup {on_attach = on_attach}
--- lspconfig.tsserver.setup {on_attach = on_attach}
--- lspconfig.tsserver.setup { on_attach = on_attach }
-lspconfig.pyls.setup {on_attach = on_attach}
-local eslint_d = {
-  lintCommand = "eslint_d -f unix --stdin --stdin-filename ${INPUT}",
-  lintStdin = true,
-  lintFormats = {"%f:%l:%c: %m"},
-  lintIgnoreExitCode = true
-  -- formatCommand = "eslint_d --fix-to-stdout --stdin --stdin-filename=${INPUT}",
-  -- formatStdin = true
-}
--- prettier or eslint --fix is not working with neovim lsp
--- calling :lua vim.lsp.buf.formatting() should have worked, but never did
--- I don't know how to debug that
-local prettier = {
-  formatCommand = "prettier --stdin --stdin-filepath ${INPUT}",
-  formatStdin = true
-}
-
--- to use efm-langserver and eslint_d, those need to be installed globally
--- brew install efm-langserver
--- npm install -g eslint_d
-lspconfig.efm.setup {
-  on_attach = on_attach,
-  root_dir = function()
-    return vim.fn.getcwd()
-  end,
-  init_options = {
-    documentFormatting = true,
-    codeAction = true
-  },
-  settings = {
-    lintDebounce = 500,
-    languages = {
-      javascript = {eslint_d},
-      javascriptreact = {eslint_d},
-      ["javascript.jsx"] = {eslint_d},
-      typescript = {eslint_d},
-      typescriptreact = {eslint_d},
-      ["typescript.tsx"] = {eslint_d}
-    }
-  },
-  filetypes = {
-    "javascript",
-    "javascriptreact",
-    "javascript.jsx",
-    "typescript",
-    "typescriptreact",
-    "typescript.tsx"
-  }
-}
-
------- Commands ------
 -- There is not api to set a command directly
 -- But there's an api to execute random vimscript - vim.nvim_exec
 -- But vim.cmd or vim.api.nvim_command serve the same purpose
@@ -324,60 +152,14 @@ lspconfig.efm.setup {
 -- vimscript
 vim.cmd("command! Vimrc :sp $MYVIMRC")
 
------- Nerd commenter ------
---
--- add 1 space after comment delimiter
-api.nvim_set_var("NERDSpaceDelims", 1)
+-- open vimrc
+api.nvim_set_keymap("n", "<leader>ev", ":split $MYVIMRC<CR>", {noremap = true})
+-- Source my vimrc file
+-- TODO: i don't know how to source a lua file
+-- source /path/to/lua does not work
+api.nvim_set_keymap("n", "<leader>sv", ":luafile $MYVIMRC<CR>", {noremap = true})
 
--- NERDTree
--- If we toggle the nerdtree buffer, and it's the only buffer open, it shouldn't
--- close vim itself. It should just replace the current buffer with last open
--- buffer
--- I just couldn't get nvim_exec to run the below code
--- And my guess is that nvim_command or vim.cmd only runs the first line
--- And just ignores the rest
--- Can test by putting echo as the second line
--- Yup, when i put echo in the second line, nothing echoes
--- But when it's in the first line, all is good
--- One way to define a vimscript function can be to create a multiline string
--- and then split it by newline and execute each line using vim.cmd
--- local nerdtree_safe = [[
--- autocmd FileType nerdtree let t:nerdtree_winnr = bufwinnr('%')
--- autocmd BufWinEnter * call PreventBuffersInNERDTree()
-
--- function! PreventBuffersInNERDTree()
--- if bufname('#') =~ 'NERD_tree' && bufname('%') !~ 'NERD_tree' && exists('t:nerdtree_winnr') && bufwinnr('%') == t:nerdtree_winnr && &buftype == '' && !exists('g:launching_fzf')
--- let bufnum = bufnr('%')
--- close
--- exe 'b ' . bufnum
--- endif
--- if exists('g:launching_fzf') | unlet g:launching_fzf | endif
--- endfunction
--- ]]
---
--- for cmd in nerdtree_safe:gmatch("[^\r\n]+") do
--- -- print(cmd)
--- vim.cmd(cmd)
--- end
--- The above didn't work. It waits for input after the first line of function
--- declaration
--- Solution 2: Define the function in lua and then call `lua LuaFn` for the
--- autocmd
--- local nerdtree_safe = [[
--- autocmd FileType nerdtree let t:nerdtree_winnr = bufwinnr('%')
--- autocmd BufWinEnter * call PreventBuffersInNERDTree()
-
--- function! PreventBuffersInNERDTree()
--- if bufname('#') =~ 'NERD_tree' && bufname('%') !~ 'NERD_tree' && exists('t:nerdtree_winnr') && bufwinnr('%') == t:nerdtree_winnr && &buftype == '' && !exists('g:launching_fzf')
--- let bufnum = bufnr('%')
--- close
--- exe 'b ' . bufnum
--- endif
--- if exists('g:launching_fzf') | unlet g:launching_fzf | endif
--- endfunction
--- ]]
-
--- api.nvim_command(nerdtree_safe)
+vim.cmd [[ set grepprg=rg\ --vimgrep ]]
 
 -- highlight yanked stuff. Done with native neovim api. No plugin.
 -- augroup command didn't work with vim.cmd.
@@ -393,37 +175,43 @@ augroup END
   false
 )
 
-vim.cmd [[ set grepprg=rg\ --vimgrep ]]
+------ NerdTree configuration ------
 
--- the live_grep default implementation is slow. Get's stuck between typing.
--- Enabling the fzf_writer extension makes it better
--- require('telescope').setup {
--- extensions = {
--- fzf_writer = {
--- minimum_grep_characters = 2,
--- minimum_files_characters = 2,
+-- toggle NERDTree show/hide using <C-n> and <leader>n
+api.nvim_set_keymap("n", "<leader>n", ":NERDTreeToggle<CR>", {noremap = true})
+-- reveal open buffer in NERDTree
+api.nvim_set_keymap("n", "<leader>r", ":NERDTreeFind<CR>", {noremap = true})
 
--- -- Disabled by default.
--- -- Will probably slow down some aspects of the sorter, but can make color highlights.
--- -- I will work on this more later.
--- use_highlighter = false,
--- },
--- fzy_native = {
--- override_generic_sorter = true,
--- override_file_sorter = true
--- }
--- }
--- }
--- require('telescope').load_extension('fzy_native')
+------ file search and find in project command mappings ------
+-- map Ctrl-q (terminals don't recognize ctrl-tab) (recent files) to show all
+-- files in the buffer
+api.nvim_set_keymap("n", "<leader>f", ":Buffers<CR>", {noremap = true})
+-- Ctrl-I maps to tab
+-- But it destroys the C-i mapping in vim. Which is used to kind of go in and
+-- used in conjunction with C-o.
+api.nvim_set_keymap("n", "<C-e>", ":Buffers<CR>", {noremap = true})
+-- map ctrlp to open file search
+api.nvim_set_keymap("n", "<C-p>", ":Files<CR>", {noremap = true})
+api.nvim_set_keymap("n", "<C-t>", ":GFiles<CR>", {noremap = true})
+api.nvim_set_keymap("n", "<leader>fg", ":Rg!", {noremap = true})
+api.nvim_set_keymap("n", "<leader>a", ":exe 'Rg!' expand('<cword')<CR>", {noremap = true})
 
--- Gstatus or git status in vim-fugitive
-api.nvim_set_keymap("n", "<leader>gs", ":G<CR>", {noremap = true})
+-- NERDCommenter
+-- add 1 space after comment delimiter
+api.nvim_set_var("NERDSpaceDelims", 1)
+-- shortcuts to toggle commen
+api.nvim_set_keymap("n", ",c", ':call NERDComment(0, "toggle")<CR>', {noremap = true})
+api.nvim_set_keymap("v", ",c", ':call NERDComment(0, "toggle")<CR>', {noremap = true})
 
--- mapping to format file using prettier installed inside projectplace frontend/harmony folder
-vim.cmd [[nnoremap <leader>p :silent %!/Volumes/code-case-sensitive/code/main_service/frontend/harmony/node_modules/.bin/prettier --stdin-filepath %<CR>]]
+-- auto-pairs
+-- disable flymode in auto-pairs plugin. Too much magic. Comes in the way more often than note
+vim.cmd [[
+let g:AutoPairsFlyMode = 0
+let g:AutoPairsShortcutBackInsert = '<M-b>'
+]]
 
-vim.cmd [[let g:fugitive_pty = 0]]
-
+-- autocompletion
+-- nvim-compe
 -- so that tab select the next option in autocomplete menu
 vim.api.nvim_set_keymap(
   "i",
@@ -431,7 +219,42 @@ vim.api.nvim_set_keymap(
   'pumvisible() ? "<C-n>" : v:lua.check_backspace() ? "<Tab>" : "<C-r>=compe#complete()<CR>"',
   {noremap = true, expr = true}
 )
+-- The below is copied directly from github readme of nvim-compe - https://github.com/hrsh7th/nvim-compe
+-- I guess those are the default values. But if i don't put there in my init.lua file, the autocompletion doesn't
+-- trigger without me pressing Ctrl-n
+require "compe".setup {
+  enabled = true,
+  autocomplete = true,
+  debug = false,
+  min_length = 1,
+  preselect = "enable",
+  throttle_time = 80,
+  source_timeout = 200,
+  incomplete_delay = 400,
+  incomplete_delay = 400,
+  max_abbr_width = 100,
+  max_kind_width = 100,
+  max_menu_width = 100,
+  documentation = true,
+  source = {
+    path = true,
+    buffer = true,
+    calc = true,
+    nvim_lsp = true,
+    nvim_lua = true,
+    vsnip = true,
+    ultisnips = true
+  }
+}
 
+-- vim-fugitive
+-- Otherwise the diffs or something else looks total funky. I forgot what.
+vim.cmd [[let g:fugitive_pty = 0]]
+
+-- formatting
+-- formatter.nvim
+-- This plugin needs a lot of setup code. Have to add one config object for each type of file. But it's the only one
+-- i could get working properly through init.lua.
 require("formatter").setup(
   {
     logging = false,
@@ -501,14 +324,135 @@ require("formatter").setup(
 )
 
 -- format on save
-vim.api.nvim_exec(
-  [[
-  augroup FormatAutogroup
-  autocmd!
-  autocmd BufWritePost *.js,*.jsx,*.ts,*.tsx,*.rs,*.lua FormatWrite
-  augroup END
-  ]],
-  true
-)
+vim.cmd [[
+augroup FormatAutogroup
+autocmd!
+autocmd BufWritePost *.js,*.jsx,*.ts,*.tsx,*.rs,*.lua FormatWrite
+augroup END
+]]
 
--- require("which-key").setup {}
+-- lsp configurations
+-- The most interesting and the most hairy. Also the most unreliable. Work sometimes and then stop working suddenly.
+local on_attach = function(client, bufnr)
+  local function buf_set_keymap(...)
+    vim.api.nvim_buf_set_keymap(bufnr, ...)
+  end
+  local function buf_set_option(...)
+    vim.api.nvim_buf_set_option(bufnr, ...)
+  end
+
+  buf_set_option("omnifunc", "v:lua.vim.lsp.omnifunc")
+
+  -- Mappings.
+  local opts = {noremap = true, silent = true}
+  buf_set_keymap("n", "gD", "<Cmd>lua vim.lsp.buf.declaration()<CR>", opts)
+  buf_set_keymap("n", "gd", "<Cmd>lua vim.lsp.buf.definition()<CR>", opts)
+  buf_set_keymap("n", "K", "<Cmd>lua vim.lsp.buf.hover()<CR>", opts)
+  buf_set_keymap("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", opts)
+  buf_set_keymap("n", "<C-k>", "<cmd>lua vim.lsp.buf.signature_help()<CR>", opts)
+  buf_set_keymap("n", "<space>wa", "<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>", opts)
+  buf_set_keymap("n", "<space>wr", "<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>", opts)
+  buf_set_keymap("n", "<space>wl", "<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>", opts)
+  buf_set_keymap("n", "<space>D", "<cmd>lua vim.lsp.buf.type_definition()<CR>", opts)
+  buf_set_keymap("n", "<space>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", opts)
+  buf_set_keymap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
+  buf_set_keymap("n", "<space>e", "<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>", opts)
+  buf_set_keymap("n", "[d", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>", opts)
+  buf_set_keymap("n", "]d", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>", opts)
+  buf_set_keymap("n", "<space>q", "<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
+  buf_set_keymap("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", opts)
+
+  -- Set some keybinds conditional on server capabilities
+  if client.resolved_capabilities.document_formatting then
+    buf_set_keymap("n", "<leader>=", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+  elseif client.resolved_capabilities.document_range_formatting then
+    buf_set_keymap("n", "<leader>=", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+  end
+
+  -- Set autocommands conditional on server_capabilities
+  -- if client.resolved_capabilities.document_highlight then
+  -- vim.api.nvim_exec(
+  -- [[
+  -- hi LspReferenceRead cterm=bold ctermbg=red guibg=LightYellow
+  -- hi LspReferenceText cterm=bold ctermbg=red guibg=LightYellow
+  -- hi LspReferenceWrite cterm=bold ctermbg=red guibg=LightYellow
+  -- augroup lsp_document_highlight
+  -- autocmd!
+  -- autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
+  -- autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
+  -- augroup END
+  -- ]],
+  -- false
+  -- )
+  -- end
+end
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+-- we update the lsp capabilities so that the lsps support snippets
+capabilities.textDocument.completion.completionItem.snippetSupport = true
+capabilities.textDocument.completion.completionItem.resolveSupport = {
+  properties = {
+    "documentation",
+    "detail",
+    "additionalTextEdits"
+  }
+}
+
+lspconfig.flow.setup {capabilities = capabilities, on_attach = on_attach}
+-- lspconfig.tsserver.setup {on_attach = on_attach}
+-- lspconfig.tsserver.setup { on_attach = on_attach }
+lspconfig.pyls.setup {capabilities = capabilities, on_attach = on_attach}
+local eslint_d = {
+  lintCommand = "eslint_d -f unix --stdin --stdin-filename ${INPUT}",
+  lintStdin = true,
+  lintFormats = {"%f:%l:%c: %m"},
+  lintIgnoreExitCode = true
+  -- formatCommand = "eslint_d --fix-to-stdout --stdin --stdin-filename=${INPUT}",
+  -- formatStdin = true
+}
+-- prettier or eslint --fix is not working with neovim lsp
+-- calling :lua vim.lsp.buf.formatting() should have worked, but never did
+-- I don't know how to debug that
+local prettier = {
+  formatCommand = "prettier --stdin --stdin-filepath ${INPUT}",
+  formatStdin = true
+}
+
+-- not sure if this one works well or not. If i want to debug by elimination, this one should go first.
+-- to use efm-langserver and eslint_d, those need to be installed globally
+-- brew install efm-langserver
+-- npm install -g eslint_d
+lspconfig.efm.setup {
+  on_attach = on_attach,
+  capabilities = capabilities,
+  root_dir = function()
+    return vim.fn.getcwd()
+  end,
+  init_options = {
+    documentFormatting = true,
+    codeAction = true
+  },
+  settings = {
+    lintDebounce = 500,
+    languages = {
+      javascript = {eslint_d},
+      javascriptreact = {eslint_d},
+      ["javascript.jsx"] = {eslint_d},
+      typescript = {eslint_d},
+      typescriptreact = {eslint_d},
+      ["typescript.tsx"] = {eslint_d}
+    }
+  },
+  filetypes = {
+    "javascript",
+    "javascriptreact",
+    "javascript.jsx",
+    "typescript",
+    "typescriptreact",
+    "typescript.tsx"
+  }
+}
+
+-- TODO
+-- 1. We need some snippet action going on. Too much manual typing going on right now. As if i love typing or something.
+-- https://github.com/hrsh7th/vim-vsnip
+--
