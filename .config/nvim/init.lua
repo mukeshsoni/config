@@ -51,6 +51,11 @@ require("packer").startup(
     -- TODO - Also verify if nvim-compe works with vsnip. I don't know how they work together.
     use "hrsh7th/vim-vsnip"
     use "hrsh7th/vim-vsnip-integ"
+    -- Never remember what register contains what? vim-peekaboo to the rescue
+    use "junegunn/vim-peekaboo"
+    -- focus mode. Might not ever use it.
+    use "junegunn/goyo.vim"
+    use "junegunn/limelight.vim"
   end
 )
 
@@ -193,6 +198,7 @@ api.nvim_set_keymap("n", "<C-e>", ":Buffers<CR>", {noremap = true})
 -- map ctrlp to open file search
 api.nvim_set_keymap("n", "<C-p>", ":Files<CR>", {noremap = true})
 api.nvim_set_keymap("n", "<C-t>", ":GFiles<CR>", {noremap = true})
+api.nvim_set_keymap("n", "<leader>l", ":Lines<CR>", {noremap = true})
 api.nvim_set_keymap("n", "<leader>fg", ":Rg!", {noremap = true})
 api.nvim_set_keymap("n", "<leader>a", ":exe 'Rg!' expand('<cword')<CR>", {noremap = true})
 
@@ -289,6 +295,16 @@ require("formatter").setup(
           }
         end
       },
+      svelte = {
+        -- prettier
+        function()
+          return {
+            exe = "prettier",
+            args = {"--stdin-filepath", vim.api.nvim_buf_get_name(0), "--single-quote"},
+            stdin = true
+          }
+        end
+      },
       javascriptreact = {
         -- prettier
         function()
@@ -331,20 +347,20 @@ autocmd BufWritePost *.js,*.jsx,*.ts,*.tsx,*.rs,*.lua FormatWrite
 augroup END
 ]]
 
+local function buf_set_keymap(...)
+  vim.api.nvim_buf_set_keymap(bufnr, ...)
+end
+local function buf_set_option(...)
+  vim.api.nvim_buf_set_option(bufnr, ...)
+end
+local opts = {noremap = true, silent = true}
+
 -- lsp configurations
 -- The most interesting and the most hairy. Also the most unreliable. Work sometimes and then stop working suddenly.
 local on_attach = function(client, bufnr)
-  local function buf_set_keymap(...)
-    vim.api.nvim_buf_set_keymap(bufnr, ...)
-  end
-  local function buf_set_option(...)
-    vim.api.nvim_buf_set_option(bufnr, ...)
-  end
-
   buf_set_option("omnifunc", "v:lua.vim.lsp.omnifunc")
 
   -- Mappings.
-  local opts = {noremap = true, silent = true}
   buf_set_keymap("n", "gD", "<Cmd>lua vim.lsp.buf.declaration()<CR>", opts)
   buf_set_keymap("n", "gd", "<Cmd>lua vim.lsp.buf.definition()<CR>", opts)
   buf_set_keymap("n", "K", "<Cmd>lua vim.lsp.buf.hover()<CR>", opts)
@@ -397,8 +413,14 @@ capabilities.textDocument.completion.completionItem.resolveSupport = {
   }
 }
 
-lspconfig.flow.setup {capabilities = capabilities, on_attach = on_attach}
--- lspconfig.tsserver.setup {on_attach = on_attach}
+local current_dir = vim.fn.getcwd()
+if string.find(current_dir, "main_service") then
+  print("we are in projectplace context. donot switch on lsp tsserver")
+  lspconfig.flow.setup {capabilities = capabilities, on_attach = on_attach}
+else
+  lspconfig.tsserver.setup {on_attach = on_attach}
+end
+
 -- lspconfig.tsserver.setup { on_attach = on_attach }
 lspconfig.pyls.setup {capabilities = capabilities, on_attach = on_attach}
 local eslint_d = {
@@ -452,7 +474,25 @@ lspconfig.efm.setup {
   }
 }
 
+-- treat svelte files as html files to get syntax highlighting
+vim.cmd [[
+au! BufNewFile,BufRead *.svelte set ft=html
+]]
+
+-- Focus mode - goyo + limelight
+-- goyo is a korean word which means silence
+-- key binding
+local opts = {noremap = true, silent = true}
+buf_set_keymap("n", "<leader>gy", ":Goyo<CR>", opts)
+
+-- Enable limelight when entering goyo mode
+-- Disable limelight when leaving goyo mode
+vim.cmd [[
+autocmd! User GoyoEnter Limelight
+autocmd! User GoyoLeave Limelight!
+]]
+
 -- TODO
 -- 1. We need some snippet action going on. Too much manual typing going on right now. As if i love typing or something.
 -- https://github.com/hrsh7th/vim-vsnip
---
+-- 2. Have a good font. Something with ligatures. Not necessary. Just for kicks.
