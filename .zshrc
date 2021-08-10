@@ -49,6 +49,13 @@ eval "$(fasd --init auto)"
 # alias j to fasd_cd. Now we can jump directory with j command
 alias j='fasd_cd -d' # z is an alias set by fasd to 'fasd_cd -d', i.e. jump to directory
 
+# using exa for listing files instead of inbuilt ls
+alias l='exa'
+alias la='exa -a'
+alias ll='exa -lah'
+alias ls='exa --color=auto'
+
+export PATH=$PATH:$HOME/.cargo/bin
 # Add projectplace tools to path
 export PATH=$PATH:~/.projectplace/bin
 [[ -s "/Users/msoni/.projectplace/bin/pptool-init.sh" ]] && source "/Users/msoni/.projectplace/bin/pptool-init.sh"
@@ -88,3 +95,13 @@ export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.g
 bindkey "^b" backward-word
 # control-f to move forward a word on command line
 bindkey "^f" forward-word
+
+# use bat to see git diffs
+batdiff() {
+    git diff --name-only --diff-filter=d | xargs bat --diff
+}
+
+
+
+
+
