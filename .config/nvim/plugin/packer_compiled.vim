@@ -1,155 +1,170 @@
 " Automatically generated packer.nvim plugin loader code
 
-if !has('nvim')
+if !has('nvim-0.5')
+  echohl WarningMsg
+  echom "Invalid Neovim version for packer.nvim!"
+  echohl None
   finish
 endif
 
+packadd packer.nvim
+
+try
+
 lua << END
-local plugins = {
+  local time
+  local profile_info
+  local should_profile = false
+  if should_profile then
+    local hrtime = vim.loop.hrtime
+    profile_info = {}
+    time = function(chunk, start)
+      if start then
+        profile_info[chunk] = hrtime()
+      else
+        profile_info[chunk] = (hrtime() - profile_info[chunk]) / 1e6
+      end
+    end
+  else
+    time = function(chunk, start) end
+  end
+  
+local function save_profiles(threshold)
+  local sorted_times = {}
+  for chunk_name, time_taken in pairs(profile_info) do
+    sorted_times[#sorted_times + 1] = {chunk_name, time_taken}
+  end
+  table.sort(sorted_times, function(a, b) return a[2] > b[2] end)
+  local results = {}
+  for i, elem in ipairs(sorted_times) do
+    if not threshold or threshold and elem[2] > threshold then
+      results[i] = elem[1] .. ' took ' .. elem[2] .. 'ms'
+    end
+  end
+
+  _G._packer = _G._packer or {}
+  _G._packer.profile_output = results
+end
+
+time("Luarocks path setup", true)
+local package_path_str = "/Users/msoni/.cache/nvim/packer_hererocks/2.1.0-beta3/share/lua/5.1/?.lua;/Users/msoni/.cache/nvim/packer_hererocks/2.1.0-beta3/share/lua/5.1/?/init.lua;/Users/msoni/.cache/nvim/packer_hererocks/2.1.0-beta3/lib/luarocks/rocks-5.1/?.lua;/Users/msoni/.cache/nvim/packer_hererocks/2.1.0-beta3/lib/luarocks/rocks-5.1/?/init.lua"
+local install_cpath_pattern = "/Users/msoni/.cache/nvim/packer_hererocks/2.1.0-beta3/lib/lua/5.1/?.so"
+if not string.find(package.path, package_path_str, 1, true) then
+  package.path = package.path .. ';' .. package_path_str
+end
+
+if not string.find(package.cpath, install_cpath_pattern, 1, true) then
+  package.cpath = package.cpath .. ';' .. install_cpath_pattern
+end
+
+time("Luarocks path setup", false)
+time("try_loadstring definition", true)
+local function try_loadstring(s, component, name)
+  local success, result = pcall(loadstring(s))
+  if not success then
+    print('Error running ' .. component .. ' for ' .. name)
+    error(result)
+  end
+  return result
+end
+
+time("try_loadstring definition", false)
+time("Defining packer_plugins", true)
+_G.packer_plugins = {
+  ["auto-pairs"] = {
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/auto-pairs"
+  },
+  ["efm-langserver"] = {
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/efm-langserver"
+  },
+  ["formatter.nvim"] = {
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/formatter.nvim"
+  },
+  fzf = {
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/fzf"
+  },
+  ["fzf.vim"] = {
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/fzf.vim"
+  },
+  gruvbox = {
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/gruvbox"
+  },
+  ["lightline.vim"] = {
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/lightline.vim"
+  },
+  nerdcommenter = {
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/nerdcommenter"
+  },
+  nerdtree = {
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/nerdtree"
+  },
+  ["nvim-compe"] = {
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/nvim-compe"
+  },
+  ["nvim-lspconfig"] = {
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/nvim-lspconfig"
+  },
   ["packer.nvim"] = {
-    loaded = false,
-    only_sequence = false,
-    only_setup = false,
-    path = "/Users/msoni/.local/share/nvim/site/pack/packer/opt/packer.nvim"
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/packer.nvim"
+  },
+  ["vim-closetag"] = {
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/vim-closetag"
+  },
+  ["vim-fugitive"] = {
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/vim-fugitive"
+  },
+  ["vim-gitgutter"] = {
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/vim-gitgutter"
+  },
+  ["vim-javascript"] = {
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/vim-javascript"
+  },
+  ["vim-jsx-pretty"] = {
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/vim-jsx-pretty"
+  },
+  ["vim-surround"] = {
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/vim-surround"
+  },
+  ["vim-unimpaired"] = {
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/vim-unimpaired"
+  },
+  ["vim-vsnip"] = {
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/vim-vsnip"
+  },
+  ["vim-vsnip-integ"] = {
+    loaded = true,
+    path = "/Users/msoni/.local/share/nvim/site/pack/packer/start/vim-vsnip-integ"
   }
 }
 
-local function handle_bufread(names)
-  for _, name in ipairs(names) do
-    local path = plugins[name].path
-    for _, dir in ipairs({ 'ftdetect', 'ftplugin', 'after/ftdetect', 'after/ftplugin' }) do
-      if #vim.fn.finddir(dir, path) > 0 then
-        vim.cmd('doautocmd BufRead')
-        return
-      end
-    end
-  end
-end
+time("Defining packer_plugins", false)
+if should_profile then save_profiles() end
 
-_packer_load = nil
-
-local function handle_after(name, before)
-  local plugin = plugins[name]
-  plugin.load_after[before] = nil
-  if next(plugin.load_after) == nil then
-    _packer_load({name}, {})
-  end
-end
-
-_packer_load = function(names, cause)
-  local some_unloaded = false
-  for _, name in ipairs(names) do
-    if not plugins[name].loaded then
-      some_unloaded = true
-      break
-    end
-  end
-
-  if not some_unloaded then return end
-
-  local fmt = string.format
-  local del_cmds = {}
-  local del_maps = {}
-  for _, name in ipairs(names) do
-    if plugins[name].commands then
-      for _, cmd in ipairs(plugins[name].commands) do
-        del_cmds[cmd] = true
-      end
-    end
-
-    if plugins[name].keys then
-      for _, key in ipairs(plugins[name].keys) do
-        del_maps[key] = true
-      end
-    end
-  end
-
-  for cmd, _ in pairs(del_cmds) do
-    vim.cmd('silent! delcommand ' .. cmd)
-  end
-
-  for key, _ in pairs(del_maps) do
-    vim.cmd(fmt('silent! %sunmap %s', key[1], key[2]))
-  end
-
-  for _, name in ipairs(names) do
-    if not plugins[name].loaded then
-      vim.cmd('packadd ' .. name)
-      if plugins[name].config then
-        for _i, config_line in ipairs(plugins[name].config) do
-          loadstring(config_line)()
-        end
-      end
-
-      if plugins[name].after then
-        for _, after_name in ipairs(plugins[name].after) do
-          handle_after(after_name, name)
-          vim.cmd('redraw')
-        end
-      end
-
-      plugins[name].loaded = true
-    end
-  end
-
-  handle_bufread(names)
-
-  if cause.cmd then
-    local lines = cause.l1 == cause.l2 and '' or (cause.l1 .. ',' .. cause.l2)
-    vim.cmd(fmt('%s%s%s %s', lines, cause.cmd, cause.bang, cause.args))
-  elseif cause.keys then
-    local keys = cause.keys
-    local extra = ''
-    while true do
-      local c = vim.fn.getchar(0)
-      if c == 0 then break end
-      extra = extra .. vim.fn.nr2char(c)
-    end
-
-    if cause.prefix then
-      local prefix = vim.v.count and vim.v.count or ''
-      prefix = prefix .. '"' .. vim.v.register .. cause.prefix
-      if vim.fn.mode('full') == 'no' then
-        if vim.v.operator == 'c' then
-          prefix = '' .. prefix
-        end
-
-        prefix = prefix .. vim.v.operator
-      end
-
-      vim.fn.feedkeys(prefix, 'n')
-    end
-
-    -- NOTE: I'm not sure if the below substitution is correct; it might correspond to the literal
-    -- characters \<Plug> rather than the special <Plug> key.
-    vim.fn.feedkeys(string.gsub(string.gsub(cause.keys, '^<Plug>', '\\<Plug>') .. extra, '<[cC][rR]>', '\r'))
-  elseif cause.event then
-    vim.cmd(fmt('doautocmd <nomodeline> %s', cause.event))
-  elseif cause.ft then
-    vim.cmd(fmt('doautocmd <nomodeline> %s FileType %s', 'filetypeplugin', cause.ft))
-    vim.cmd(fmt('doautocmd <nomodeline> %s FileType %s', 'filetypeindent', cause.ft))
-  end
-end
-
--- Runtimepath customization
-
--- Pre-load configuration
--- Post-load configuration
--- Conditional loads
--- Load plugins in order defined by `after`
 END
 
-function! s:load(names, cause) abort
-call luaeval('_packer_load(_A[1], _A[2])', [a:names, a:cause])
-endfunction
-
-
-" Command lazy-loads
-
-" Keymap lazy-loads
-
-augroup packer_load_aucmds
-  au!
-  " Filetype lazy-loads
-  " Event lazy-loads
-augroup END
+catch
+  echohl ErrorMsg
+  echom "Error in packer_compiled: " .. v:exception
+  echom "Please check your config for correctness"
+  echohl None
+endtry

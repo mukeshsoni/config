@@ -56,13 +56,21 @@ require("packer").startup(
     -- focus mode. Might not ever use it.
     use "junegunn/goyo.vim"
     use "junegunn/limelight.vim"
+    use "tpope/vim-obsession"
+    use "ryanoasis/vim-devicons"
+    use {
+      "nvim-treesitter/nvim-treesitter",
+      run = ":TSUpdate"
+    }
+    use "haya14busa/is.vim"
+    use "nelstrom/vim-visual-star-search"
   end
 )
 
 local lspconfig = require "lspconfig"
 
 -- colorscheme
-vim.cmd [[set termguicolors]]
+-- vim.cmd [[set termguicolors]]
 api.nvim_command [[colorscheme gruvbox]]
 
 -- so that vim-closetag works for jsx inside javascript files
@@ -106,7 +114,7 @@ vim.o.smarttab = true
 -- don't want case sensitive searches
 vim.o.ignorecase = true
 -- but still want search to be smart. If i type a upper case thing, do a case
--- sensitive search
+-- sensitive blah
 vim.o.smartcase = true
 -- In insert mode, on pressing tab, insert 2 spaces
 -- vim.o.expandtab = true
@@ -194,13 +202,19 @@ api.nvim_set_keymap("n", "<leader>f", ":Buffers<CR>", {noremap = true})
 -- Ctrl-I maps to tab
 -- But it destroys the C-i mapping in vim. Which is used to kind of go in and
 -- used in conjunction with C-o.
-api.nvim_set_keymap("n", "<C-e>", ":Buffers<CR>", {noremap = true})
+api.nvim_set_keymap("n", "<C-b>", ":Buffers<CR>", {noremap = true})
 -- map ctrlp to open file search
 api.nvim_set_keymap("n", "<C-p>", ":Files<CR>", {noremap = true})
+-- go to next buffer
+api.nvim_set_keymap("n", "gn", ":bn<cr>", {noremap = true})
+-- go to previous buffer
+api.nvim_set_keymap("n", "gp", ":bp<cr>", {noremap = true})
+-- toggle between 2 buffers
+api.nvim_set_keymap("n", "gb", ":b#<cr>", {noremap = true})
 api.nvim_set_keymap("n", "<C-t>", ":GFiles<CR>", {noremap = true})
 api.nvim_set_keymap("n", "<leader>l", ":Lines<CR>", {noremap = true})
 api.nvim_set_keymap("n", "<leader>fg", ":Rg!", {noremap = true})
-api.nvim_set_keymap("n", "<leader>a", ":exe 'Rg!' expand('<cword')<CR>", {noremap = true})
+api.nvim_set_keymap("n", "<leader>a", ":exe 'Rg!' expand('<cword>')<CR>", {noremap = true})
 
 -- NERDCommenter
 -- add 1 space after comment delimiter
@@ -219,12 +233,12 @@ let g:AutoPairsShortcutBackInsert = '<M-b>'
 -- autocompletion
 -- nvim-compe
 -- so that tab select the next option in autocomplete menu
-vim.api.nvim_set_keymap(
-  "i",
-  "<Tab>",
-  'pumvisible() ? "<C-n>" : v:lua.check_backspace() ? "<Tab>" : "<C-r>=compe#complete()<CR>"',
-  {noremap = true, expr = true}
-)
+-- vim.api.nvim_set_keymap(
+-- "i",
+-- "<Tab>",
+-- 'pumvisible() ? "<C-n>" : v:lua.check_backspace() ? "<Tab>" : "<C-r>=compe#complete()<CR>"',
+-- {noremap = true, expr = true}
+-- )
 -- The below is copied directly from github readme of nvim-compe - https://github.com/hrsh7th/nvim-compe
 -- I guess those are the default values. But if i don't put there in my init.lua file, the autocompletion doesn't
 -- trigger without me pressing Ctrl-n
@@ -256,6 +270,7 @@ require "compe".setup {
 -- vim-fugitive
 -- Otherwise the diffs or something else looks total funky. I forgot what.
 vim.cmd [[let g:fugitive_pty = 0]]
+api.nvim_set_keymap("n", "<leader>gs", ":Git<CR>", {noremap = true})
 
 -- formatting
 -- formatter.nvim
@@ -266,6 +281,16 @@ require("formatter").setup(
     logging = false,
     filetype = {
       typescriptreact = {
+        -- prettier
+        function()
+          return {
+            exe = "prettier",
+            args = {"--stdin-filepath", vim.api.nvim_buf_get_name(0), "--single-quote"},
+            stdin = true
+          }
+        end
+      },
+      css = {
         -- prettier
         function()
           return {
@@ -296,6 +321,16 @@ require("formatter").setup(
         end
       },
       svelte = {
+        -- prettier
+        function()
+          return {
+            exe = "prettier",
+            args = {"--stdin-filepath", vim.api.nvim_buf_get_name(0), "--single-quote"},
+            stdin = true
+          }
+        end
+      },
+      json = {
         -- prettier
         function()
           return {
@@ -353,7 +388,7 @@ end
 local function buf_set_option(...)
   vim.api.nvim_buf_set_option(bufnr, ...)
 end
-local opts = {noremap = true, silent = true}
+local key_binding_options = {noremap = true, silent = true}
 
 -- lsp configurations
 -- The most interesting and the most hairy. Also the most unreliable. Work sometimes and then stop working suddenly.
@@ -361,28 +396,33 @@ local on_attach = function(client, bufnr)
   buf_set_option("omnifunc", "v:lua.vim.lsp.omnifunc")
 
   -- Mappings.
-  buf_set_keymap("n", "gD", "<Cmd>lua vim.lsp.buf.declaration()<CR>", opts)
-  buf_set_keymap("n", "gd", "<Cmd>lua vim.lsp.buf.definition()<CR>", opts)
-  buf_set_keymap("n", "K", "<Cmd>lua vim.lsp.buf.hover()<CR>", opts)
-  buf_set_keymap("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", opts)
-  buf_set_keymap("n", "<C-k>", "<cmd>lua vim.lsp.buf.signature_help()<CR>", opts)
-  buf_set_keymap("n", "<space>wa", "<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>", opts)
-  buf_set_keymap("n", "<space>wr", "<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>", opts)
-  buf_set_keymap("n", "<space>wl", "<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>", opts)
-  buf_set_keymap("n", "<space>D", "<cmd>lua vim.lsp.buf.type_definition()<CR>", opts)
-  buf_set_keymap("n", "<space>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", opts)
-  buf_set_keymap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
-  buf_set_keymap("n", "<space>e", "<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>", opts)
-  buf_set_keymap("n", "[d", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>", opts)
-  buf_set_keymap("n", "]d", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>", opts)
-  buf_set_keymap("n", "<space>q", "<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
-  buf_set_keymap("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", opts)
+  buf_set_keymap("n", "gD", "<Cmd>lua vim.lsp.buf.declaration()<CR>", key_binding_options)
+  buf_set_keymap("n", "gd", "<Cmd>lua vim.lsp.buf.definition()<CR>", key_binding_options)
+  buf_set_keymap("n", "K", "<Cmd>lua vim.lsp.buf.hover()<CR>", key_binding_options)
+  buf_set_keymap("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", key_binding_options)
+  buf_set_keymap("n", "<C-k>", "<cmd>lua vim.lsp.buf.signature_help()<CR>", key_binding_options)
+  buf_set_keymap("n", "<space>wa", "<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>", key_binding_options)
+  buf_set_keymap("n", "<space>wr", "<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>", key_binding_options)
+  buf_set_keymap(
+    "n",
+    "<space>wl",
+    "<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>",
+    key_binding_options
+  )
+  buf_set_keymap("n", "<space>D", "<cmd>lua vim.lsp.buf.type_definition()<CR>", key_binding_options)
+  buf_set_keymap("n", "<space>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", key_binding_options)
+  buf_set_keymap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", key_binding_options)
+  buf_set_keymap("n", "<space>e", "<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>", key_binding_options)
+  buf_set_keymap("n", "[d", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>", key_binding_options)
+  buf_set_keymap("n", "]d", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>", key_binding_options)
+  buf_set_keymap("n", "<space>q", "<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>", key_binding_options)
+  buf_set_keymap("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", key_binding_options)
 
   -- Set some keybinds conditional on server capabilities
   if client.resolved_capabilities.document_formatting then
-    buf_set_keymap("n", "<leader>=", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+    buf_set_keymap("n", "<leader>=", "<cmd>lua vim.lsp.buf.formatting()<CR>", key_binding_options)
   elseif client.resolved_capabilities.document_range_formatting then
-    buf_set_keymap("n", "<leader>=", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+    buf_set_keymap("n", "<leader>=", "<cmd>lua vim.lsp.buf.formatting()<CR>", key_binding_options)
   end
 
   -- Set autocommands conditional on server_capabilities
@@ -414,15 +454,17 @@ capabilities.textDocument.completion.completionItem.resolveSupport = {
 }
 
 local current_dir = vim.fn.getcwd()
-if string.find(current_dir, "main_service") then
-  print("we are in projectplace context. donot switch on lsp tsserver")
-  lspconfig.flow.setup {capabilities = capabilities, on_attach = on_attach}
-else
-  lspconfig.tsserver.setup {on_attach = on_attach}
-end
+-- if string.find(current_dir, "main_service") or string.find(current_dir, "harmony") then
+-- lspconfig.tsserver.setup {on_attach = on_attach}
+-- print("we are in projectplace context. donot switch on lsp tsserver")
+-- lspconfig.flow.setup {capabilities = capabilities, on_attach = on_attach}
+-- else
+lspconfig.tsserver.setup {on_attach = on_attach}
+-- end
 
 -- lspconfig.tsserver.setup { on_attach = on_attach }
 lspconfig.pyls.setup {capabilities = capabilities, on_attach = on_attach}
+lspconfig.rust_analyzer.setup {on_attach = on_attach}
 local eslint_d = {
   lintCommand = "eslint_d -f unix --stdin --stdin-filename ${INPUT}",
   lintStdin = true,
@@ -482,8 +524,7 @@ au! BufNewFile,BufRead *.svelte set ft=html
 -- Focus mode - goyo + limelight
 -- goyo is a korean word which means silence
 -- key binding
-local opts = {noremap = true, silent = true}
-buf_set_keymap("n", "<leader>gy", ":Goyo<CR>", opts)
+buf_set_keymap("n", "<leader>gy", ":Goyo<CR>", key_binding_options)
 
 -- Enable limelight when entering goyo mode
 -- Disable limelight when leaving goyo mode
@@ -492,7 +533,32 @@ autocmd! User GoyoEnter Limelight
 autocmd! User GoyoLeave Limelight!
 ]]
 
+-- treesitter
+require "nvim-treesitter.configs".setup {
+  ensure_installed = "maintained", -- one of "all", "maintained" (parsers with maintainers), or a list of languages
+  highlight = {
+    enable = true, -- false will disable the whole extension
+    -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
+    -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
+    -- Using this option may slow down your editor, and you may see some duplicate highlights.
+    -- Instead of true it can also be a list of languages
+    additional_vim_regex_highlighting = false
+  }
+}
+
+-- Allow passing optional flags to Rg command
+-- Otherwise Rg doesn't take any other argument than the search string
+-- because of shellscape or something
+vim.cmd(
+  [[
+command! -bang -nargs=* Rg call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case " . <q-args>, 1, <bang>0)
+]]
+)
+
 -- TODO
 -- 1. We need some snippet action going on. Too much manual typing going on right now. As if i love typing or something.
 -- https://github.com/hrsh7th/vim-vsnip
 -- 2. Have a good font. Something with ligatures. Not necessary. Just for kicks.
+--
+--
+--
