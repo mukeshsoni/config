@@ -58,10 +58,10 @@ require("packer").startup(
     use "junegunn/limelight.vim"
     use "tpope/vim-obsession"
     use "ryanoasis/vim-devicons"
-    use {
-      "nvim-treesitter/nvim-treesitter",
-      run = ":TSUpdate"
-    }
+    -- use {
+    -- "nvim-treesitter/nvim-treesitter",
+    -- run = ":TSUpdate"
+    -- }
     use "haya14busa/is.vim"
     use "nelstrom/vim-visual-star-search"
   end
@@ -220,8 +220,8 @@ api.nvim_set_keymap("n", "<leader>a", ":exe 'Rg!' expand('<cword>')<CR>", {norem
 -- add 1 space after comment delimiter
 api.nvim_set_var("NERDSpaceDelims", 1)
 -- shortcuts to toggle commen
-api.nvim_set_keymap("n", ",c", ':call NERDComment(0, "toggle")<CR>', {noremap = true})
-api.nvim_set_keymap("v", ",c", ':call NERDComment(0, "toggle")<CR>', {noremap = true})
+api.nvim_set_keymap("n", ",c", ':call nerdcommenter#Comment(0, "toggle")<CR>', {noremap = true})
+api.nvim_set_keymap("v", ",c", ':call nerdcommenter#Comment(0, "toggle")<CR>', {noremap = true})
 
 -- auto-pairs
 -- disable flymode in auto-pairs plugin. Too much magic. Comes in the way more often than note
@@ -271,6 +271,7 @@ require "compe".setup {
 -- Otherwise the diffs or something else looks total funky. I forgot what.
 vim.cmd [[let g:fugitive_pty = 0]]
 api.nvim_set_keymap("n", "<leader>gs", ":Git<CR>", {noremap = true})
+api.nvim_set_keymap("n", "<leader>gb", ":Git blame<CR>", {noremap = true})
 
 -- formatting
 -- formatter.nvim
@@ -534,17 +535,17 @@ autocmd! User GoyoLeave Limelight!
 ]]
 
 -- treesitter
-require "nvim-treesitter.configs".setup {
-  ensure_installed = "maintained", -- one of "all", "maintained" (parsers with maintainers), or a list of languages
-  highlight = {
-    enable = true, -- false will disable the whole extension
-    -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-    -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-    -- Using this option may slow down your editor, and you may see some duplicate highlights.
-    -- Instead of true it can also be a list of languages
-    additional_vim_regex_highlighting = false
-  }
-}
+-- require "nvim-treesitter.configs".setup {
+-- ensure_installed = "maintained", -- one of "all", "maintained" (parsers with maintainers), or a list of languages
+-- highlight = {
+-- enable = true, -- false will disable the whole extension
+-- -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
+-- -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
+-- -- Using this option may slow down your editor, and you may see some duplicate highlights.
+-- -- Instead of true it can also be a list of languages
+-- additional_vim_regex_highlighting = false
+-- }
+-- }
 
 -- Allow passing optional flags to Rg command
 -- Otherwise Rg doesn't take any other argument than the search string
