@@ -102,6 +102,10 @@ batdiff() {
 }
 
 
+export DATABASE_URL=postgres://postgres:postgrespwd@localhost:5432/postgres
 
+# much better ctrl-r experience. They call it neural net for your shell history.
+eval "$(mcfly init zsh)"
 
-
+### PPDEV INSTALLED - read init script
+[[ -s "/Volumes/code-case-sensitive/code/main_service/localenv/ppdev-bash-init.sh" ]] && source "/Volumes/code-case-sensitive/code/main_service/localenv/ppdev-bash-init.sh"
