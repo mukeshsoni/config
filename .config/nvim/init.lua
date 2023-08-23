@@ -1,4 +1,4 @@
-local vim = vim
+local vim = vim -- curious, any reasoning behind using local here?
 local api = vim.api
 
 -- needed by nvim-compe
@@ -15,6 +15,7 @@ vim.cmd [[set mouse=a]]
 vim.o.hidden = true
 vim.cmd [[set report=2]]
 -- took me a long time to figure out how to change the leader key in lua
+-- 👆 this is the truth 😂 , same here
 vim.g.mapleader = " "
 
 require("packer").startup(
