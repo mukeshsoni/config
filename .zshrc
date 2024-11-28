@@ -5,8 +5,12 @@ SAVEHIST=$HISTSIZE
 autoload -Uz compinit && compinit
 
 export AWS_PROFILE=486329218230_Platforma-Editor
-export PV_PLATFORMA_HOME=/Volumes/workspace/platforma
-export MAUDE_CACHE_DIR=/Volumes/workspace/personal/pms/cache
+export MAUDE_CACHE_DIR=$HOME/code/pms/cache
+export PATH="/opt/homebrew/bin:$PATH"
+export PATH="/Users/mukeshsoni/Library/Python/3.9/bin:$PATH"
+export PATH="/usr/bin:/usr/local/bin:$PATH"
+export PATH="$HOME/.cargo/bin:$PATH"
+alias python=python3
 
 
 bindkey -e
@@ -16,24 +20,17 @@ bindkey -e
 
 # stuff i need to do every time i open a new terminal instance
 # so that nvm is found in that terminal instance
-export NVM_DIR="$HOME/.nvm"
- [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
- [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 
 alias ls=lsd
-alias ppdev="/Volumes/workspace/projectplace/main_service/localenv/bin/ppdev"
 alias p=pnpm
 alias sqlite3="/opt/homebrew/opt/sqlite/bin/sqlite3"
-# bun completions
-[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
 export GOPATH="$HOME/go"
 export PATH="$GOPATH/bin:$PATH"
 export CLICOLOR=1
 
-export PATH=$PATH:/Volumes/workspace/projectplace/main_service/localenv/bin
 [[ -d /Applications/WezTerm.app/Contents/MacOS ]] && export PATH="/Applications/WezTerm.app/Contents/MacOS:$PATH"
 
 # openssl
